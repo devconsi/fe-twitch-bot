@@ -9,7 +9,7 @@ function App() {
   const [width, setWidth] = useState(100);
 
   const backendServerUrl = "https://merciful-comet-buttercup.glitch.me";
-  const backendServerWebsocket = "ws://merciful-comet-buttercup.glitch.me";
+  const backendServerWebsocket = "wss://merciful-comet-buttercup.glitch.me";
   const ws = useRef(null);
 
   console.log(backendServerUrl);

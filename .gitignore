@@ -4,3 +4,5 @@ node_modules
 dist
 *.http
 *.txt
+# Local Netlify folder
+.netlify
