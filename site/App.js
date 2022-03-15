@@ -4,7 +4,7 @@ import "./assets/App.css";
 import Bar from "./Bar";
 
 function App() {
-  const [isPaused, setPause] = useState(true);
+  const [isPaused, setPause] = useState(false);
   const [ticket, setTicket] = useState();
   const [width, setWidth] = useState(100);
 
@@ -12,17 +12,13 @@ function App() {
   const backendServerWebsocket = "wss://merciful-comet-buttercup.glitch.me";
   const ws = useRef(null);
 
-  console.log(backendServerUrl);
-  console.log(backendServerWebsocket);
+
   //Websocket functions
 
-  function openBackendWebsocket(ticket) {
+  function openBackendWebsocket() {
     if (!ws.current) return;
 
-    // const backendSocket = new WebSocket(
-    //   `${backendServerWebsocket}/?ticket=${ticket}`
-    // );
-    backendSocket = ws.current;
+    let backendSocket = ws.current;
 
     backendSocket.onmessage = (event) => {
       if (isPaused) return;
@@ -30,7 +26,8 @@ function App() {
       const eventData = JSON.parse(event.data);
       console.log(eventData);
       if (eventData.type == "PONG") {
-        console.log ("pong boiz");
+        //Ignore PONG
+      } else if (eventData.type == "FOLLOW") {
         setWidth(100);
       } else if (eventData.type == "MESSAGE") {
         console.log ("message recieved");
@@ -57,6 +54,9 @@ function App() {
   }
 
   useEffect(() => {
+    console.log(backendServerUrl);
+    console.log(backendServerWebsocket);
+
     async function getWebsocketTicket() {
       console.log(backendServerUrl);
       const response = await fetch(`${backendServerUrl}/ticket`);
@@ -70,13 +70,18 @@ function App() {
     getWebsocketTicket();
 }, []);
 
+
+
   useEffect(() => {
     ws.current = new WebSocket(`${backendServerWebsocket}/?ticket=${ticket}`);
     ws.current.onopen = () => console.log("ws opened");
-    ws.current.onclose = () => console.log("ws closed");
+    ws.current.onclose = () => {
+      console.log("ws closed");
+    }
 
     const wsCurrent = ws.current;
 
+    openBackendWebsocket(); //NOT sure if 
     return () => {
       wsCurrent.close();
     };
@@ -84,12 +89,23 @@ function App() {
 
   useEffect(() => {
     if (!ws.current) return;
+  
+    const interval = setInterval(() => {
+      let backendSocket = ws.current;
+      if(backendSocket){
+        const data = {"type": "ping", "message":"ping"}
+        backendSocket.send(JSON.stringify({"message":"ping"}));
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [ticket]);
 
-    const websocketTicket = ticket;
-    console.log(ws.current);
-    console.log(`websocket ticket ${websocketTicket}`);
-    openBackendWebsocket(websocketTicket);
-  }, [isPaused]);
+  useEffect(() => {
+    if (!ws.current) return;
+
+
+    //openBackendWebsocket(); //NOT sure if 
+  }, [isPaused]); // would it be ws?
 
   return (
     <div className="App">
