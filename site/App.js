@@ -127,7 +127,7 @@ function App() {
       <Bar width={width} setWidth={setWidth}/>
 
       <div>
-        <button onClick={() => setPause(!isPaused)}>
+        <button hidden={true} onClick={() => setPause(!isPaused)}>
           {isPaused ? "Resume" : "Pause"}
         </button>
       </div>

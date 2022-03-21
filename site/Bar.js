@@ -27,6 +27,7 @@ const Button = (props) => {
       <input
         type="button"
         value="Reset"
+        hidden={true}
         onClick={() => props.setWidth(100)} 
       />
     </div>
@@ -55,7 +56,7 @@ function Bar( { width, setWidth}) {
     /* Load Bar */
     <div>
       <ProgressBar width={width} setWidth={setWidth} />
-      <Button width={width} setWidth={setWidth} />
+      <Button  width={width} setWidth={setWidth} />
     </div>
   );
 }
