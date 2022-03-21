@@ -2,14 +2,16 @@ import React, { useEffect, useState, useRef } from "react";
 
 import "./assets/App.css";
 import Bar from "./Bar";
+import config from "./config.json"
 
 function App() {
   const [isPaused, setPause] = useState(false);
   const [ticket, setTicket] = useState();
-  const [width, setWidth] = useState(100);
+  const [width, setWidth] = useState(0);
 
-  const backendServerUrl = "https://merciful-comet-buttercup.glitch.me";
-  const backendServerWebsocket = "wss://merciful-comet-buttercup.glitch.me";
+  const backendServerUrl = config.BACKEND_SERVER_URL;
+  const backendServerWebsocket = config.BACKEND_SERVER_WEBSOCKET;
+  const upward = config.UPWARD_FACTOR;
   const ws = useRef(null);
 
 
@@ -28,7 +30,8 @@ function App() {
       if (eventData.type == "PONG") {
         //Ignore PONG
       } else if (eventData.type == "FOLLOW") {
-        setWidth(100);
+        //sets value to upward config
+        setWidth(upward);
       } else if (eventData.type == "MESSAGE") {
         console.log ("message recieved");
       } else if (eventData.type == "CHAT_COMMAND") {
@@ -73,13 +76,17 @@ function App() {
 
 
   useEffect(() => {
+    if(!ticket) return;
+
     ws.current = new WebSocket(`${backendServerWebsocket}/?ticket=${ticket}`);
     ws.current.onopen = () => console.log("ws opened");
     ws.current.onclose = () => {
       console.log("ws closed");
     }
 
+    setWidth(100); //Initial state after setting ws
     const wsCurrent = ws.current;
+    console.log(wsCurrent);
 
     openBackendWebsocket(); //NOT sure if 
     return () => {
@@ -102,10 +109,18 @@ function App() {
 
   useEffect(() => {
     if (!ws.current) return;
-
-
-    //openBackendWebsocket(); //NOT sure if 
-  }, [isPaused]); // would it be ws?
+  
+    const interval = setInterval(() => {
+      const newWidth = width - config.DECREASE_PERCENTAGE;
+      console.log(`decreasing to: ${newWidth}`);
+      if(newWidth > 0){
+        setWidth(newWidth);//every interval amount of time decrease x amount of %
+      } else{
+        clearInterval(interval);
+      }
+    }, config.DECREASE_TIME * 1000); //amount of time from interval
+    return () => clearInterval(interval);
+  }, [width]);
 
   return (
     <div className="App">

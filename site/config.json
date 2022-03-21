@@ -1,0 +1,7 @@
+{
+    "BACKEND_SERVER_URL": "https://merciful-comet-buttercup.glitch.me",
+    "BACKEND_SERVER_WEBSOCKET": "wss://merciful-comet-buttercup.glitch.me",
+    "DECREASE_PERCENTAGE": 0.25,
+    "DECREASE_TIME": 1,
+    "UPWARD_FACTOR": 100
+  }
