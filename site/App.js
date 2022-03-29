@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 
 import "./assets/App.css";
 import Bar from "./Bar";
-import config from "./config.json"
+import config from "./config.json";
 
 function App() {
   const [isPaused, setPause] = useState(false);
@@ -13,7 +13,6 @@ function App() {
   const backendServerWebsocket = config.BACKEND_SERVER_WEBSOCKET;
   const upward = config.UPWARD_FACTOR;
   const ws = useRef(null);
-
 
   //Websocket functions
 
@@ -33,11 +32,11 @@ function App() {
         //sets value to upward config
         setWidth(upward);
       } else if (eventData.type == "MESSAGE") {
-        console.log ("message recieved");
+        console.log("message recieved");
       } else if (eventData.type == "CHAT_COMMAND") {
         switch (eventData.message.command) {
           case "lurk":
-            //lurkersQueue.push(eventData.message.username);
+          //lurkersQueue.push(eventData.message.username);
         }
       } else if (eventData.type == "POINTS_REDEMPTION") {
         switch (eventData.message.command) {
@@ -65,30 +64,28 @@ function App() {
       const response = await fetch(`${backendServerUrl}/ticket`);
       const data = await response.json();
       console.log(data);
-      const ticketData  = data["ticket"]
+      const ticketData = data["ticket"];
       setTicket(ticketData);
       return ticketData;
     }
 
     getWebsocketTicket();
-}, []);
-
-
+  }, []);
 
   useEffect(() => {
-    if(!ticket) return;
+    if (!ticket) return;
 
     ws.current = new WebSocket(`${backendServerWebsocket}/?ticket=${ticket}`);
     ws.current.onopen = () => console.log("ws opened");
     ws.current.onclose = () => {
       console.log("ws closed");
-    }
+    };
 
     setWidth(100); //Initial state after setting ws
     const wsCurrent = ws.current;
     console.log(wsCurrent);
 
-    openBackendWebsocket(); //NOT sure if 
+    openBackendWebsocket(); //NOT sure if
     return () => {
       wsCurrent.close();
     };
@@ -96,35 +93,45 @@ function App() {
 
   useEffect(() => {
     if (!ws.current) return;
-  
+
     const interval = setInterval(() => {
       let backendSocket = ws.current;
-      if(backendSocket){
-        const data = {"type": "ping", "message":"ping"}
-        backendSocket.send(JSON.stringify({"message":"ping"}));
+      if (backendSocket) {
+        const data = { type: "ping", message: "ping" };
+        backendSocket.send(JSON.stringify({ message: "ping" }));
       }
     }, 60000);
     return () => clearInterval(interval);
   }, [ticket]);
 
+
+  const reset = () => {
+      if (width === 0) {
+        setWidth(100);
+      }
+  }
+
   useEffect(() => {
     if (!ws.current) return;
-  
+
     const interval = setInterval(() => {
       const newWidth = width - config.DECREASE_PERCENTAGE;
-      console.log(`decreasing to: ${newWidth}`);
-      if(newWidth > 0){
-        setWidth(newWidth);//every interval amount of time decrease x amount of %
-      } else{
+      //console.log(`decreasing to: ${newWidth}`);
+      if (newWidth >= 0) {
+        setWidth(newWidth); //every interval amount of time decrease x amount of %
+      } else {
         clearInterval(interval);
+        setTimeout(reset,config.RESET_TIME * 1000);
       }
     }, config.DECREASE_TIME * 1000); //amount of time from interval
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [width]);
 
   return (
     <div className="App">
-      <Bar width={width} setWidth={setWidth}/>
+      <Bar width={width} setWidth={setWidth} />
 
       <div>
         <button hidden={true} onClick={() => setPause(!isPaused)}>

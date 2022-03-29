@@ -3,5 +3,6 @@
     "BACKEND_SERVER_WEBSOCKET": "wss://merciful-comet-buttercup.glitch.me",
     "DECREASE_PERCENTAGE": 0.25,
     "DECREASE_TIME": 1,
-    "UPWARD_FACTOR": 100
+    "UPWARD_FACTOR": 100,
+    "RESET_TIME": 5
   }
